@@ -194,11 +194,27 @@ Usuários do painel Filament (administração e recepção).
 - [x] Criar migrations com Soft Deletes e constraints (`students`, `plans`, `time_slots`, `schedule_closures`, `student_time_slot`, `payments`).
 - [x] Definir Models, Casts e Relacionamentos Eloquent.
 
-### Fase 2 — Painel Filament (CRUDs)
-- [ ] Configurar `PlanResource` e `TimeSlotResource` (grade por blocos de horários).
-- [ ] Configurar `StudentResource` com seletor dinâmico de vagas e relation managers.
-- [ ] Configurar `ScheduleClosureResource`.
-- [ ] Configurar `PaymentResource` com ações de baixa rápida.
+### Fase 2 — Painel Filament v5 (CRUDs por Nível de Complexidade)
+
+> **Estrutura Filament v5:** Recursos organizados em pastas modulares contendo `Resource.php`, subpasta `Schemas/` (formulários/infolists), subpasta `Tables/` (tabelas/filtros/ações) e subpasta `Pages/` (Livewire components).
+
+- [x] **2.1 — `PlanResource`** *(Mais Simples)*
+  - `app/Filament/Resources/Plans/` (`PlanResource.php`, `Schemas/PlanForm.php`, `Tables/PlansTable.php`, `Pages/`)
+  - Gestão de planos, preços (R$), duração e suporte a Soft Deletes (`--soft-deletes`).
+- [x] **2.2 — `ScheduleClosureResource`** *(Simples)*
+  - `app/Filament/Resources/ScheduleClosures/` (`ScheduleClosureResource.php`, `Schemas/ScheduleClosureForm.php`, `Tables/ScheduleClosuresTable.php`, `Pages/`)
+  - Fechamentos de data total ou horário pontual (feriados, reformas) com motivo.
+- [ ] **2.3 — `TimeSlotResource`** *(Médio)*
+  - `app/Filament/Resources/TimeSlots/` (`TimeSlotResource.php`, `Schemas/TimeSlotForm.php`, `Tables/TimeSlotsTable.php`, `Pages/`)
+  - Grade semanal com dia da semana, faixa de horário, capacidade e badges de ocupação em tempo real.
+- [ ] **2.4 — `PaymentResource`** *(Médio-Avançado)*
+  - `app/Filament/Resources/Payments/` (`PaymentResource.php`, `Schemas/PaymentForm.php`, `Tables/PaymentsTable.php`, `Pages/`)
+  - Gestão financeira, filtros por status/mês, Soft Deletes e Action customizada rápida "Dar Baixa / Registrar Pagamento".
+- [ ] **2.5 — `StudentResource`** *(Mais Complexo)*
+  - `app/Filament/Resources/Students/` (`StudentResource.php`, `Schemas/StudentForm.php`, `Tables/StudentsTable.php`, `Pages/`, `RelationManagers/`)
+  - Cadastro de alunos com foto, CPF, dia de vencimento (1-31) e Soft Deletes.
+  - Seletor dinâmico de horários com contagem de vagas e bloqueio visual de horários lotados.
+  - `RelationManagers`: Histórico de Pagamentos e Horários Matriculados.
 
 ### Fase 3 — Lógica Financeira e Automação
 - [ ] Implementar serviço de geração de mensalidade com cálculo de dias limites.
