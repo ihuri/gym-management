@@ -27,9 +27,11 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
+            ->brandName('GM Academia')
             ->login()
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Purple,
+                'gray' => Color::Zinc,
             ])
             ->databaseNotifications()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
@@ -41,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
             ->widgets([
                 \App\Filament\Widgets\GymOverviewStatsWidget::class,
                 \App\Filament\Widgets\TimeSlotOccupancyChartWidget::class,
+                \App\Filament\Widgets\TodayScheduleWidget::class,
                 \App\Filament\Widgets\LatestPaymentsTableWidget::class,
             ])
             ->middleware([

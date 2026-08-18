@@ -56,7 +56,7 @@ class TimeSlotOccupancyChartWidget extends ChartWidget
                 [
                     'label' => 'Alunos Matriculados',
                     'data' => $enrolledData,
-                    'backgroundColor' => '#f59e0b', // Amber / Primary
+                    'backgroundColor' => '#9333ea', // Roxo / Purple
                 ],
                 [
                     'label' => 'Capacidade Total de Vagas',
