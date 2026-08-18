@@ -85,14 +85,16 @@ Usuários do painel Filament (administração e recepção).
 
 ---
 
-### `schedule_closures` (fechamento de dias/horários específicos)
+### `schedule_closures` (fechamento de dias/horários específicos ou recorrentes)
 
 | Campo | Tipo | Descrição |
 |---|---|---|
 | id | bigint PK | Identificador único |
-| date | date | Data fechada |
+| type | enum | `'data_especifica'` (pontual) ou `'recorrente'` (dia da semana fixo) |
+| date | date nullable | Data fechada (quando `type = 'data_especifica'`) |
+| day_of_week | tinyint nullable | Dia recorrente 0–6 (quando `type = 'recorrente'`, ex: todos os sábados) |
 | time_slot_id | FK → time_slots, **nullable** | Se `null` = dia inteiro fechado; se preenchido = apenas o horário |
-| reason | string nullable | Motivo (ex: "Feriado", "Manutenção") |
+| reason | string nullable | Motivo (ex: "Sem funcionamento aos sábados", "Feriado") |
 | timestamps | | `created_at`, `updated_at` |
 
 ---
