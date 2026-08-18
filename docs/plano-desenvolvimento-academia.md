@@ -204,13 +204,13 @@ Usuários do painel Filament (administração e recepção).
 - [x] **2.2 — `ScheduleClosureResource`** *(Simples)*
   - `app/Filament/Resources/ScheduleClosures/` (`ScheduleClosureResource.php`, `Schemas/ScheduleClosureForm.php`, `Tables/ScheduleClosuresTable.php`, `Pages/`)
   - Fechamentos de data total ou horário pontual (feriados, reformas) com motivo.
-- [ ] **2.3 — `TimeSlotResource`** *(Médio)*
+- [x] **2.3 — `TimeSlotResource`** *(Médio)*
   - `app/Filament/Resources/TimeSlots/` (`TimeSlotResource.php`, `Schemas/TimeSlotForm.php`, `Tables/TimeSlotsTable.php`, `Pages/`)
   - Grade semanal com dia da semana, faixa de horário, capacidade e badges de ocupação em tempo real.
-- [ ] **2.4 — `PaymentResource`** *(Médio-Avançado)*
+- [x] **2.4 — `PaymentResource`** *(Médio-Avançado)*
   - `app/Filament/Resources/Payments/` (`PaymentResource.php`, `Schemas/PaymentForm.php`, `Tables/PaymentsTable.php`, `Pages/`)
   - Gestão financeira, filtros por status/mês, Soft Deletes e Action customizada rápida "Dar Baixa / Registrar Pagamento".
-- [ ] **2.5 — `StudentResource`** *(Mais Complexo)*
+- [x] **2.5 — `StudentResource`** *(Mais Complexo)*
   - `app/Filament/Resources/Students/` (`StudentResource.php`, `Schemas/StudentForm.php`, `Tables/StudentsTable.php`, `Pages/`, `RelationManagers/`)
   - Cadastro de alunos com foto, CPF, dia de vencimento (1-31) e Soft Deletes.
   - Seletor dinâmico de horários com contagem de vagas e bloqueio visual de horários lotados.
