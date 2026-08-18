@@ -1,7 +1,7 @@
 <?php
 
-test('the application returns a successful response', function () {
+test('a rota principal redireciona para o painel administrativo /admin', function () {
     $response = $this->get('/');
 
-    $response->assertStatus(200);
+    $response->assertRedirect('/admin');
 });

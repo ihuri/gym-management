@@ -227,4 +227,4 @@ Usuários do painel Filament (administração e recepção).
 - [x] Desenvolver widgets de ocupação de horários e métricas financeiras.
 
 ### Fase 5 — Testes Automatizados
-- [ ] Testes Pest para regras de capacidade, cálculo de vencimento e rotinas de notificação.
+- [x] Testes Pest para regras de capacidade, cálculo de vencimento e rotinas de notificação.
