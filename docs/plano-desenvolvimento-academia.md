@@ -219,9 +219,9 @@ Usuários do painel Filament (administração e recepção).
   - `RelationManagers`: Histórico de Pagamentos e Horários Matriculados.
 
 ### Fase 3 — Lógica Financeira e Automação
-- [ ] Implementar serviço de geração de mensalidade com cálculo de dias limites.
-- [ ] Criar comando de rotina diária (`app:check-payments-and-notify`).
-- [ ] Configurar notificações no Filament para avisar inadimplentes aos administradores.
+- [x] Implementar serviço de geração de mensalidade com cálculo de dias limites.
+- [x] Criar comando de rotina diária (`app:check-payments-and-notify`).
+- [x] Configurar notificações no Filament para avisar inadimplentes aos administradores.
 
 ### Fase 4 — Dashboard e Widgets
 - [ ] Desenvolver widgets de ocupação de horários e métricas financeiras.
