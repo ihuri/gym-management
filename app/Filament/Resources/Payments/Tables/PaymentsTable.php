@@ -15,7 +15,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 
@@ -76,14 +75,6 @@ class PaymentsTable
                     ->formatStateUsing(fn (string $state): string => ucfirst($state)),
             ])
             ->filters([
-                SelectFilter::make('status')
-                    ->label('Filtrar por Status')
-                    ->options([
-                        'pendente' => 'Pendente',
-                        'pago' => 'Pago',
-                        'atrasado' => 'Atrasado',
-                        'cancelado' => 'Cancelado',
-                    ]),
                 TrashedFilter::make(),
             ])
             ->recordActions([
