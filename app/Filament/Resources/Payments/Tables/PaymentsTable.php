@@ -9,6 +9,9 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
@@ -88,15 +91,39 @@ class PaymentsTable
                     ->label('Dar Baixa')
                     ->icon(Heroicon::OutlinedCheckCircle)
                     ->color('success')
-                    ->requiresConfirmation()
-                    ->modalHeading('Confirmar Recebimento de Mensalidade')
-                    ->modalDescription('Deseja marcar esta mensalidade como paga no valor integral hoje?')
-                    ->action(function (Payment $record): void {
+                    ->modalHeading('Dar Baixa na Mensalidade')
+                    ->modalDescription('Informe a forma de pagamento e detalhes para confirmar o recebimento.')
+                    ->form([
+                        Select::make('payment_method')
+                            ->label('Tipo de Pagamento')
+                            ->options([
+                                'pix' => 'PIX',
+                                'dinheiro' => 'Dinheiro',
+                                'cartao_credito' => 'Cartão de Crédito',
+                                'cartao_debito' => 'Cartão de Débito',
+                            ])
+                            ->default(fn (Payment $record): string => $record->payment_method ?? 'pix')
+                            ->required()
+                            ->native(false),
+                        TextInput::make('paid_amount')
+                            ->label('Valor Recebido')
+                            ->numeric()
+                            ->prefix('R$')
+                            ->default(fn (Payment $record) => $record->amount)
+                            ->required(),
+                        DatePicker::make('paid_at')
+                            ->label('Data do Pagamento')
+                            ->default(now())
+                            ->displayFormat('d/m/Y')
+                            ->native(false)
+                            ->required(),
+                    ])
+                    ->action(function (Payment $record, array $data): void {
                         $record->update([
                             'status' => 'pago',
-                            'paid_at' => now(),
-                            'paid_amount' => $record->amount,
-                            'payment_method' => $record->payment_method ?? 'pix',
+                            'paid_at' => $data['paid_at'] ?? now(),
+                            'paid_amount' => $data['paid_amount'] ?? $record->amount,
+                            'payment_method' => $data['payment_method'],
                         ]);
 
                         Notification::make()
