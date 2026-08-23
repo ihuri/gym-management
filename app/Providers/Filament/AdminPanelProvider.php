@@ -27,7 +27,10 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('admin')
-            ->brandName('GM Academia')
+            ->brandName('GM FITNESS')
+            ->brandLogo(asset('images/logo.svg'))
+            ->brandLogoHeight('5.0rem')
+            ->favicon(asset('images/logo.svg'))
             ->login()
             ->colors([
                 'primary' => Color::Purple,
