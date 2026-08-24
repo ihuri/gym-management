@@ -3,15 +3,17 @@
 namespace App\Filament\Resources\Students\RelationManagers;
 
 use App\Models\TimeSlot;
-use Filament\Actions\AttachAction;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
-use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -54,10 +56,7 @@ class TimeSlotsRelationManager extends RelationManager
                         return "{$occupied} / {$record->capacity} vagas";
                     })
                     ->badge()
-                    ->color(function (TimeSlot $record): string {
-                        $occupied = $record->activeStudents()->count();
-                        return $occupied >= $record->capacity ? 'danger' : 'success';
-                    }),
+                    ->color(fn (TimeSlot $record): string => $record->activeStudents()->count() >= $record->capacity ? 'danger' : 'success'),
                 TextColumn::make('pivot.enrolled_at')
                     ->label('Matriculado em')
                     ->date('d/m/Y'),
@@ -71,46 +70,113 @@ class TimeSlotsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                AttachAction::make()
-                    ->label('Matricular em Horário')
-                    ->modalHeading('Vincular Aluno ao Horário')
-                    ->preloadRecordSelect()
-                    ->form(fn (AttachAction $action): array => [
-                        $action->getRecordSelect()
-                            ->label('Selecione o Horário')
-                            ->options(function () {
+                Action::make('attachTimeSlots')
+                    ->label('Adicionar Horários')
+                    ->icon(Heroicon::OutlinedClock)
+                    ->color('primary')
+                    ->modalHeading('Adicionar Horários do Aluno')
+                    ->modalDescription('Escolha o dia da semana e marque os horários para matricular o aluno.')
+                    ->modalWidth('lg')
+                    ->form([
+                        Select::make('day_of_week')
+                            ->label('1. Selecione o Dia da Semana')
+                            ->options([
+                                1 => 'Segunda-feira',
+                                2 => 'Terça-feira',
+                                3 => 'Quarta-feira',
+                                4 => 'Quinta-feira',
+                                5 => 'Sexta-feira',
+                                6 => 'Sábado',
+                                0 => 'Domingo',
+                            ])
+                            ->default(1)
+                            ->live()
+                            ->required()
+                            ->native(false),
+                        CheckboxList::make('time_slot_ids')
+                            ->label('2. Escolha os Horários de Treino')
+                            ->options(function (Get $get, $livewire): array {
+                                $day = $get('day_of_week') ?? 1;
+                                $alreadyEnrolled = $livewire->ownerRecord->timeSlots()
+                                    ->wherePivot('status', 'ativo')
+                                    ->pluck('time_slots.id')
+                                    ->toArray();
+
                                 return TimeSlot::query()
                                     ->where('active', true)
-                                    ->orderBy('day_of_week')
+                                    ->where('day_of_week', (int) $day)
                                     ->orderBy('start_time')
+                                    ->get()
+                                    ->mapWithKeys(function (TimeSlot $slot) use ($alreadyEnrolled) {
+                                        $occupied = $slot->activeStudents()->count();
+                                        $isFull = $occupied >= $slot->capacity;
+                                        $isEnrolled = in_array($slot->id, $alreadyEnrolled);
+
+                                        $tag = $isEnrolled ? ' — [Já Matriculado]' : ($isFull ? ' — [LOTADO]' : " — {$occupied}/{$slot->capacity} vagas");
+                                        return [$slot->id => "{$slot->formatted_time_range}{$tag}"];
+                                    })
+                                    ->toArray();
+                            })
+                            ->descriptions(function (Get $get): array {
+                                $day = $get('day_of_week') ?? 1;
+                                return TimeSlot::query()
+                                    ->where('active', true)
+                                    ->where('day_of_week', (int) $day)
                                     ->get()
                                     ->mapWithKeys(function (TimeSlot $slot) {
                                         $occupied = $slot->activeStudents()->count();
-                                        $lotado = $occupied >= $slot->capacity ? ' [LOTADO]' : '';
-                                        return [$slot->id => "{$slot->label} ({$occupied}/{$slot->capacity} vagas){$lotado}"];
-                                    });
+                                        $remaining = max(0, $slot->capacity - $occupied);
+                                        return [$slot->id => "{$remaining} vaga(s) disponível(is)"];
+                                    })
+                                    ->toArray();
                             })
-                            ->disableOptionWhen(function (string $value): bool {
-                                $slot = TimeSlot::find($value);
-                                if (! $slot) {
-                                    return false;
-                                }
-                                return $slot->activeStudents()->count() >= $slot->capacity;
-                            })
-                            ->required(),
-                        Hidden::make('status')->default('ativo'),
-                        Hidden::make('enrolled_at')->default(now()->toDateString()),
-                    ])
-                    ->before(function (AttachAction $action, array $data) {
-                        $slot = TimeSlot::find($data['recordId'] ?? null);
-                        if ($slot && $slot->activeStudents()->count() >= $slot->capacity) {
-                            Notification::make()
-                                ->title('Horário Lotado!')
-                                ->body('Este horário já atingiu a capacidade máxima de alunos.')
-                                ->danger()
-                                ->send();
+                            ->disableOptionWhen(function (string $value, $livewire): bool {
+                                $alreadyEnrolled = $livewire->ownerRecord->timeSlots()
+                                    ->wherePivot('status', 'ativo')
+                                    ->pluck('time_slots.id')
+                                    ->toArray();
 
-                            $action->halt();
+                                if (in_array((int) $value, $alreadyEnrolled)) {
+                                    return true;
+                                }
+
+                                $slot = TimeSlot::find($value);
+                                return ! $slot || $slot->activeStudents()->count() >= $slot->capacity;
+                            })
+                            ->columns(2)
+                            ->gridDirection('row')
+                            ->required(),
+                    ])
+                    ->action(function (array $data, $livewire): void {
+                        $student = $livewire->ownerRecord;
+                        $slotIds = $data['time_slot_ids'] ?? [];
+                        $added = 0;
+
+                        foreach ($slotIds as $slotId) {
+                            $slot = TimeSlot::find($slotId);
+                            if ($slot && $slot->activeStudents()->count() < $slot->capacity) {
+                                $existing = $student->timeSlots()->where('time_slot_id', $slotId)->first();
+                                if ($existing) {
+                                    $student->timeSlots()->updateExistingPivot($slotId, [
+                                        'status' => 'ativo',
+                                        'enrolled_at' => now()->toDateString(),
+                                    ]);
+                                } else {
+                                    $student->timeSlots()->attach($slotId, [
+                                        'status' => 'ativo',
+                                        'enrolled_at' => now()->toDateString(),
+                                    ]);
+                                }
+                                $added++;
+                            }
+                        }
+
+                        if ($added > 0) {
+                            Notification::make()
+                                ->title("Matrícula realizada com sucesso!")
+                                ->body("{$added} horário(s) adicionado(s) para o aluno.")
+                                ->success()
+                                ->send();
                         }
                     }),
             ])
